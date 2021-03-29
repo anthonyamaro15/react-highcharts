@@ -1,5 +1,11 @@
 import Highcharts from 'react-highcharts';
 import HighchartsReact from 'highcharts-react-official'
+import { useEffect, useState } from 'react';
+// import { idText } from 'typescript';
+
+ const t = ['#19381F', '#88292F','#A2A79E'];
+// chartOptions will be in the callback function as follows --- chart.options
+// chart line colors --- chart.legend
 const chartOptions  = {
   chart: {
       type: 'line'
@@ -36,9 +42,16 @@ const chartOptions  = {
 }
 
 function App() {
+ 
+    const testing = (chart: any) => {
+        console.log('before ', chart);
+        chart.options.colors = t
+        // chart.legend.allItems[0].color = t[0];
+
+    }
   return (
     <div className="App">
-      <HighchartsReact hicharts={Highcharts} options={chartOptions} />
+      <HighchartsReact hicharts={Highcharts} options={chartOptions} callback={testing}/>
     </div>
   );
 }
