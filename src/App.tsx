@@ -1,136 +1,13 @@
 import * as Highcharts from "react-highcharts";
 import HighchartsReact from "highcharts-react-official";
 import { useEffect, useState } from "react";
+import { fitData } from "./utils";
 
 const t = ["#19381F", "#88292F", "#A2A79E"];
 // chartOptions will be in the callback function as follows --- chart.options
 // chart line colors --- chart.legend
 
 // this can be another way to update the chart info and styles
-
-function regression(x: any, y: any, typ: any) {
-   var type = typ == null ? "linear" : typ;
-   var N = x.length;
-   var slope;
-   var intercept;
-   var SX = 0;
-   var SY = 0;
-   var SXX = 0;
-   var SXY = 0;
-   var SYY = 0;
-   var Y = [];
-   var X = [];
-
-   if (type == "linear") {
-      X = x;
-      Y = y;
-   } else if (type == "exp" || type == "exponential") {
-      for (var i = 0; i < y.length; i++) {
-         // ignore points <= 0, log undefined.
-         if (y[i] <= 0) {
-            N--;
-         } else {
-            X.push(x[i]);
-            Y.push(Math.log(y[i]));
-         }
-      }
-   }
-
-   for (var i = 0; i < N; i++) {
-      SX = SX + X[i];
-      SY = SY + Y[i];
-      SXY = SXY + X[i] * Y[i];
-      SXX = SXX + X[i] * X[i];
-      SYY = SYY + Y[i] * Y[i];
-   }
-
-   slope = (N * SXY - SX * SY) / (N * SXX - SX * SX);
-   intercept = (SY - slope * SX) / N;
-
-   return [slope, intercept];
-}
-
-function linearRegression(X: any, Y: any) {
-   var ret;
-   ret = regression(X, Y, "linear");
-   return [ret[0], ret[1]];
-}
-
-function expRegression(X: any, Y: any) {
-   var ret;
-   var x = X;
-   var y = Y;
-   ret = regression(x, y, "exp");
-   var base = Math.exp(ret[0]);
-   var coeff = Math.exp(ret[1]);
-   return [base, coeff];
-}
-
-function fitData(data: any, typ: any) {
-   var type = typ == null ? "linear" : typ;
-   var ret;
-   var res;
-   var x = [];
-   var y = [];
-   var ypred = [];
-
-   for (i = 0; i < data.length; i++) {
-      if (
-         data[i] != null &&
-         Object.prototype.toString.call(data[i]) === "[object Array]"
-      ) {
-         if (data[i] != null && data[i][0] != null && data[i][1] != null) {
-            x.push(data[i][0]);
-            y.push(data[i][1]);
-         }
-      } else if (data[i] != null && typeof data[i] === "number") {
-         //If type of X axis is category
-         x.push(i);
-         y.push(data[i]);
-      } else if (
-         data[i] != null &&
-         Object.prototype.toString.call(data[i]) === "[object Object]"
-      ) {
-         if (data[i] != null && data[i].x != null && data[i].y != null) {
-            x.push(data[i].x);
-            y.push(data[i].y);
-         }
-      }
-   }
-
-   if (type == "linear") {
-      ret = linearRegression(x, y);
-      for (var i = 0; i < x.length; i++) {
-         res = ret[0] * x[i] + ret[1];
-         ypred.push([x[i], res]);
-      }
-
-      return {
-         data: ypred,
-         slope: ret[0],
-         intercept: ret[1],
-         y: function (x: any) {
-            return this.slope * x + this.intercept;
-         },
-         x: function (y: any) {
-            return (y - this.intercept) / this.slope;
-         },
-      };
-   } else if (type == "exp" || type == "exponential") {
-      ret = expRegression(x, y);
-      for (var i = 0; i < x.length; i++) {
-         res = ret[1] * Math.pow(ret[0], x[i]);
-         ypred.push([x[i], res]);
-      }
-      ypred.sort();
-
-      return {
-         data: ypred,
-         base: ret[0],
-         coeff: ret[1],
-      };
-   }
-}
 
 var sourceData = [
    [0, 99.75],
@@ -215,6 +92,9 @@ const chartOptions = {
 };
 
 const chartOption2 = {
+   chart: {
+      type: "spline",
+   },
    title: {
       text: "RNA",
       x: -20, //center
@@ -284,6 +164,46 @@ const chartOption2 = {
    },
 };
 
+const thirdChart = {
+   title: {
+      text: "Scatter plot with regression line",
+   },
+   xAxis: {
+      min: -0.5,
+      max: 5.5,
+   },
+   yAxis: {
+      min: 0,
+   },
+   series: [
+      {
+         type: "line",
+         name: "Regression Line",
+         dashStyle: "dash",
+         data: [
+            [0, 1.11],
+            [5, 4.51],
+         ],
+         marker: {
+            enabled: false,
+         },
+         states: {
+            hover: {
+               lineWidth: 0,
+            },
+         },
+         enableMouseTracking: false,
+      },
+      {
+         type: "line",
+         name: "Observations",
+         data: [1, 1.5, 2.8, 3.5, 3.9, 4.2],
+         marker: {
+            radius: 4,
+         },
+      },
+   ],
+};
 function App() {
    const testing = (chart: any) => {
       // console.log('before ', chart);
@@ -298,6 +218,7 @@ function App() {
             callback={testing}
          />
          <HighchartsReact hicharts={Highcharts} options={chartOption2} />
+         <HighchartsReact hicharts={Highcharts} options={thirdChart} />
       </div>
    );
 }
