@@ -3,7 +3,7 @@ import * as Highcharts from "highcharts";
 
 const chartOptions = {
    chart: {
-      type: "line",
+      type: null,
    },
    title: {
       text: null,
@@ -13,24 +13,35 @@ const chartOptions = {
       title: {
          text: "Year",
       },
+      //   accessibility: {
+      //      rangeDescription: "Range: 2015 to 2020",
+      //   },
    },
    yAxis: {
-      categories: ["0k", "15k", "30k", "45k", "60k", "75k"],
+      categories: ["0", "15000", "30000", "45000", "60000", "75000"],
       title: {
          text: "Dollars",
       },
+      //   accessibility: {
+      //      rangeDescription: "Range: 15000 to 75000",
+      //   },
    },
    plotOptions: {
       line: {
          dataLabels: {
-            enabled: true,
+            enabled: false,
          },
+
          enableMouseTracking: false,
+      },
+   },
+   tooltip: {
+      formatter: function (this: any) {
+         return `$${String(this.y)}`;
       },
    },
    series: [
       {
-         //  regression: true,
          type: "line",
          color: "grey",
          name: "Regression Line",
@@ -39,6 +50,16 @@ const chartOptions = {
             [0, 1.11],
             [5, 4.51],
          ],
+         line: {
+            dataLabels: {
+               enabled: false,
+            },
+         },
+         /** this functions uses the same data to display the trendline */
+         //  data: (function (this: any) {
+         //     return fitData([0, 720, 200, 675, 340, 564], null)?.data;
+         //  })(),
+         //  data: [0, 120, 200, 675, 340, 564, 19000, 20000, 250000, 54308, 45673],
          marker: {
             enabled: false,
          },
@@ -54,6 +75,8 @@ const chartOptions = {
          color: "red",
          name: "Observations",
          data: [1, 1.5, 2.8, 3.5, 3.9, 4.2],
+         //  data: [0, 720, 200, 675, 340, 564],
+
          marker: {
             radius: 1,
          },
@@ -63,7 +86,7 @@ const chartOptions = {
 
 const MockFiile = () => {
    return (
-      <div>
+      <div className="mockup">
          <HighchartsReact highcharts={Highcharts} options={chartOptions} />
       </div>
    );
